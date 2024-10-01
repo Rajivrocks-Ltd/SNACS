@@ -26,10 +26,10 @@ def is_dependent(input_graph, a, b):
         # Mark the current node as visited.
         visited.add(node)
 
-        # Explore all neighbors of the current node.
-        for neighbor in input_graph[node]:
-            if neighbor not in visited:
-                if dfs(neighbor):  # If any path leads to b, return True.
+        # Explore all neighbours of the current node.
+        for neighbour in input_graph[node]:
+            if neighbour not in visited:
+                if dfs(neighbour):  # If any path leads to b, return True.
                     return True
 
         # If no path to b is found, return False.
@@ -44,27 +44,28 @@ def count_open_wedges(input_graph):
     """
     Count the number of open wedges in the undirected graph.
 
-    :param graph: The undirected graph represented as an adjacency list (dict of sets).
+    :param input_graph: The undirected graph represented as an adjacency list (dict of sets).
     :return: The total number of open wedges in the graph.
     """
-    open_wedges = 0
+    open_wedges_count = 0
 
     # Iterate over all nodes in the graph.
     for v in input_graph:
-        neighbors = sorted(input_graph[v])  # Get the neighbors of node v.
+        neighbours = sorted(input_graph[v])  # Get the neighbours of node v. We sort them to avoid getting different
+        # results
 
-        # Iterate over all pairs of neighbors of v.
-        for i in range(len(neighbors)):
-            for j in range(i + 1, len(neighbors)):
-                u = neighbors[i]
-                w = neighbors[j]
+        # Iterate over all pairs of neighbours of v.
+        for i in range(len(neighbours)):
+            for j in range(i + 1, len(neighbours)):
+                u = neighbours[i]
+                w = neighbours[j]
 
                 # Check if there is no edge between u and w.
                 if w not in input_graph[u]:
                     # If there is no edge, we have an open wedge (u, v, w).
-                    open_wedges += 1
+                    open_wedges_count += 1
 
-    return open_wedges
+    return open_wedges_count
 
 
 # Exercise: 1.8 - Count Friendship Paradox
@@ -72,11 +73,11 @@ def count_friendship_paradox(input_graph):
     """
     Count the number of nodes for which the friendship paradox holds.
 
-    :param graph: The undirected graph represented as an adjacency list (dict of sets).
+    :param input_graph: The undirected graph represented as an adjacency list (dict of sets).
     :return: The number of nodes satisfying the friendship paradox.
     """
 
-    paradox_count = 0
+    paradox_count_occurence = 0
 
     # Iterate over all nodes in the graph.
     for v in input_graph:
@@ -88,24 +89,24 @@ def count_friendship_paradox(input_graph):
             continue
 
         # Compute the average degree of neighbors of v.
-        neighbor_degrees_sum = 0
-        for neighbor in input_graph[v]:
-            neighbor_degrees_sum += len(input_graph[neighbor])
+        neighbour_degrees_total = 0
+        for neighbour in input_graph[v]:
+            neighbour_degrees_total += len(input_graph[neighbour])
 
-        avg_neighbor_degree = neighbor_degrees_sum / degree_v
+        average_neighbor_degree = neighbour_degrees_total / degree_v
 
-        # Check if the friendship paradox holds.
-        if degree_v < avg_neighbor_degree:
-            paradox_count += 1
+        # Check for the friendship paradox.
+        if degree_v < average_neighbor_degree:
+            paradox_count_occurence += 1
 
-    return paradox_count
+    return paradox_count_occurence
 
 
-def compute_diameter(graph):
+def compute_diameter(input_graph):
     """
     Compute the diameter of the graph using the concept of k-neighborhoods.
 
-    :param graph: The undirected graph represented as an adjacency list (dict of sets).
+    :param input_graph: The undirected graph represented as an adjacency list (dict of sets).
     :return: The diameter of the graph.
     """
 
@@ -115,26 +116,26 @@ def compute_diameter(graph):
         """
         # Initialize a queue for BFS and a distance dictionary.
         queue = deque([v])
-        distances = {v: 0}
+        path_lengths = {v: 0}
 
         while queue:
             node = queue.popleft()
-            current_distance = distances[node]
+            current_path_length = path_lengths[node]
 
             # Explore all neighbors of the current node.
-            for neighbor in graph[node]:
-                if neighbor not in distances:
-                    distances[neighbor] = current_distance + 1
-                    queue.append(neighbor)
+            for neighbour in input_graph[node]:
+                if neighbour not in path_lengths:
+                    path_lengths[neighbour] = current_path_length + 1
+                    queue.append(neighbour)
 
         # Return the maximum distance from node v.
-        return max(distances.values())
+        return max(path_lengths.values())
 
     # Compute the eccentricity for each node and track the maximum eccentricity (diameter).
     diameter = 0
-    for v in graph:
-        eccentricity_v = bfs_distance(v)
-        diameter = max(diameter, eccentricity_v)
+    for v in input_graph:
+        eccentricity_of_v = bfs_distance(v)
+        diameter = max(diameter, eccentricity_of_v)
 
     return diameter
 
@@ -197,8 +198,8 @@ def calculate_degrees_per_node(file):
     :param file: The path to the TSV file.
     :return: Two dictionaries: indegree and outdegree, mapping nodes to their degree values.
     """
-    in_degree = defaultdict(int)
-    out_degree = defaultdict(int)
+    in_degree_per_node = defaultdict(int)
+    out_degree_per_node = defaultdict(int)
 
     with open(file, 'r') as f:
         for line in f:
@@ -208,15 +209,16 @@ def calculate_degrees_per_node(file):
                 userA, userB = parts
 
                 if userA.isdigit() and userB.isdigit():
-                    out_degree[userA] += 1
-                    in_degree[userB] += 1
+                    out_degree_per_node[userA] += 1
+                    in_degree_per_node[userB] += 1
 
-    return in_degree, out_degree
+    return in_degree_per_node, out_degree_per_node
 
 def plot_distribution(degree_dict, degree_type, network_size):
     """
     Plot the degree distribution using a bar plot #ToDo (change to histogram maybe?)
 
+    :param network_size: The size of the network (e.g., 'Medium' or 'Large').
     :param degree_dict: A dictionary mapping nodes to their degree values.
     :param degree_type: A string indicating the type of degree ('Indegree' or 'Outdegree').
     """
@@ -246,6 +248,7 @@ def analyze_components(file, network_size):
     """
     Analyze weakly and strongly connected components of the graph.
 
+    :param network_size: The size of the network (e.g., 'Medium' or 'Large').
     :param file: The path to the TSV file.
     :return: Dictionary with component analysis.
     """
@@ -259,34 +262,34 @@ def analyze_components(file, network_size):
             if len(parts) == 2:
                 G.add_edge(parts[0], parts[1])
 
-    # 1. Number of weakly connected components
-    weakly_connected_components = list(nx.weakly_connected_components(G))
-    num_wcc = len(weakly_connected_components)
+    # All weakly connected components in the graph
+    wcc = list(nx.weakly_connected_components(G))
+    number_of_wcc = len(wcc)
 
-    # 2. Number of strongly connected components
-    strongly_connected_components = list(nx.strongly_connected_components(G))
-    num_scc = len(strongly_connected_components)
+    # All strongly connected components in the graph
+    scc = list(nx.strongly_connected_components(G))
+    number_of_scc = len(scc)
 
-    # 3. Largest weakly connected component (by number of nodes and links)
-    largest_wcc = max(weakly_connected_components, key=len)
+    # Find the largest weakly connected component in the graph and create a subgraph of it
+    largest_wcc = max(wcc, key=len)
     subgraph_wcc = G.subgraph(largest_wcc)  # Extract subgraph of largest WCC
-    wcc_size_nodes = subgraph_wcc.number_of_nodes()
-    wcc_size_edges = subgraph_wcc.number_of_edges()
+    wcc_size_number_of_nodes = subgraph_wcc.number_of_nodes()
+    wcc_size_number_of_edges = subgraph_wcc.number_of_edges()
 
-    # 4. Largest strongly connected component (by number of nodes and links)
-    largest_scc = max(strongly_connected_components, key=len)
+    # Find the largest strongly connected component in the graph and create a subgraph of it
+    largest_scc = max(scc, key=len)
     subgraph_scc = G.subgraph(largest_scc)  # Extract subgraph of largest SCC
-    scc_size_nodes = subgraph_scc.number_of_nodes()
-    scc_size_edges = subgraph_scc.number_of_edges()
+    scc_size_number_of_nodes = subgraph_scc.number_of_nodes()
+    scc_size_number_of_edges = subgraph_scc.number_of_edges()
 
     # Return the analysis results
     return {
-        f"{network_size} - Number of WCC": num_wcc,
-        f"{network_size} - Number of SCC": num_scc,
-        f"{network_size} - Largest WCC (nodes)": wcc_size_nodes,
-        f"{network_size} - Largest WCC (edges)": wcc_size_edges,
-        f"{network_size} - Largest SCC (nodes)": scc_size_nodes,
-        f"{network_size} - Largest SCC (edges)": scc_size_edges,
+        f"{network_size} - Number of WCC": number_of_wcc,
+        f"{network_size} - Number of SCC": number_of_scc,
+        f"{network_size} - Largest WCC (nodes)": wcc_size_number_of_nodes,
+        f"{network_size} - Largest WCC (edges)": wcc_size_number_of_edges,
+        f"{network_size} - Largest SCC (nodes)": scc_size_number_of_nodes,
+        f"{network_size} - Largest SCC (edges)": scc_size_number_of_edges,
     }
 
 
@@ -307,10 +310,9 @@ def calculate_average_clustering(file):
                 G.add_edge(parts[0], parts[1])
 
     # Compute the average clustering coefficient (directed)
-    avg_clustering = nx.average_clustering(G, count_zeros=True)
+    avg_clustering = nx.average_clustering(G, count_zeros=False)
 
     return avg_clustering
-
 
 def compute_distance_distribution(file, num_samples=1000):
     """
@@ -331,7 +333,7 @@ def compute_distance_distribution(file, num_samples=1000):
             if len(parts) == 2:
                 G.add_edge(parts[0], parts[1])
 
-        # Find the largest weakly connected component (WCC)
+        # Find the largest weakly connected component
         largest_wcc = max(nx.weakly_connected_components(G), key=len)
         subgraph_wcc = G.subgraph(largest_wcc)  # Extract the subgraph of the largest WCC
 
@@ -339,17 +341,17 @@ def compute_distance_distribution(file, num_samples=1000):
         sampled_nodes = np.random.choice(list(subgraph_wcc.nodes), size=min(num_samples, len(subgraph_wcc)),
                                          replace=False)
 
-        # Create a dictionary to store the distance distribution
-        distance_distribution = defaultdict(int)
+        # Use a default dictionary to store the distance distributions
+        distance_distributions = defaultdict(int)
 
         # Perform BFS from the sampled nodes and count the distances
         for node in sampled_nodes:
             lengths = nx.single_source_shortest_path_length(subgraph_wcc, node)
             for target, distance in lengths.items():
                 if node != target:  # Ignore self-loops (distance 0)
-                    distance_distribution[distance] += 1
+                    distance_distributions[distance] += 1
 
-        return distance_distribution
+        return distance_distributions
 
 
 def plot_distance_distribution(distance_distribution, network_size):
@@ -367,7 +369,7 @@ def plot_distance_distribution(distance_distribution, network_size):
     plt.show()
 
 
-def compute_average_distance_sampled(file, num_samples=100):
+def compute_average_distance_sampled(file, num_samples=1000):
     """
     Compute the average distance for the largest weakly connected component (WCC)
     by sampling shortest paths from a subset of nodes.
@@ -386,7 +388,7 @@ def compute_average_distance_sampled(file, num_samples=100):
             if len(parts) == 2:
                 G.add_edge(parts[0], parts[1])
 
-    # Find the largest weakly connected component (WCC)
+    # Find the largest weakly connected component
     largest_wcc = max(nx.weakly_connected_components(G), key=len)
     subgraph_wcc = G.subgraph(largest_wcc)  # Extract the subgraph of the largest WCC
 
@@ -440,7 +442,7 @@ graph_1_6 = {
 }
 
 if __name__ == '__main__':
-    # Exercise 1
+    # # Exercise 1
     # print(f"Exercise: 1.6 - {is_dependent(graph_1_6,'a', 'e')}")  # Outputs: True, because a -> c -> f.
     # print(f"Exercise: 1.7 - {count_open_wedges(graph_1_7)}")  # Outputs: 2, because (a, c, f) and (a, d, f) are open wedges.
     # print(f"Exercise: 1.8 - {count_friendship_paradox(graph_1_8)}")  # Outputs: 2, because the paradox holds for nodes 'a' and 'b'.
@@ -449,8 +451,8 @@ if __name__ == '__main__':
     # # Exercise 2
     # print(f'Exercise: 2.1 - Medium = {count_directed_links("data/medium.tsv")}. Large = {count_directed_links("data/large.tsv")}')
     # print(f'Exercise 2.2 - Medium = {user_network_count("data/medium.tsv")}. Large = {user_network_count("data/large.tsv")}')
-
-    # Exercise 2.3
+    #
+    # # Exercise 2.3
     # in_degree, out_degree = calculate_degrees_per_node("data/medium.tsv")
     # plot_distribution(in_degree, "In-Degree", "Medium")
     # plot_distribution(out_degree, "Out-Degree", "Medium")
@@ -458,8 +460,8 @@ if __name__ == '__main__':
     # in_degree, out_degree = calculate_degrees_per_node("data/large.tsv")
     # plot_distribution(in_degree, "In-Degree", "Large")
     # plot_distribution(out_degree, "Out-Degree", "large")
-
-    # Exercise 2.4
+    #
+    # # Exercise 2.4
     # results = analyze_components("data/medium.tsv", 'Medium')
     # # Display the results
     # for key, value in results.items():
@@ -477,15 +479,15 @@ if __name__ == '__main__':
     # print(f"Exercise 2.5 - Average Clustering Coefficient (Large): {avg_clustering_large}")
 
     # Exercise 2.6
-    # distance_distribution_medium = compute_distance_distribution("data/medium.tsv")
-    # plot_distance_distribution(distance_distribution_medium, "Medium")
-    # #
-    # distance_distribution_large = compute_distance_distribution("data/large.tsv")
-    # plot_distance_distribution(distance_distribution_large, "Large")
-
-    # Exercise 2.7
-    avg_distance_medium = compute_average_distance_sampled("data/medium.tsv")
-    avg_distance_large = compute_average_distance_sampled("data/large.tsv")
-
-    print(f"Exercise 2.7 - Average Distance (Medium): {avg_distance_medium}")
-    print(f"Exercise 2.7 - Average Distance (Large): {avg_distance_large}")
+    distance_distribution_medium = compute_distance_distribution("data/medium.tsv")
+    plot_distance_distribution(distance_distribution_medium, "Medium")
+    #
+    distance_distribution_large = compute_distance_distribution("data/large.tsv")
+    plot_distance_distribution(distance_distribution_large, "Large")
+    #
+    # # Exercise 2.7
+    # avg_distance_medium = compute_average_distance_sampled("data/medium.tsv")
+    # avg_distance_large = compute_average_distance_sampled("data/large.tsv")
+    #
+    # print(f"Exercise 2.7 - Average Distance (Medium): {avg_distance_medium}")
+    # print(f"Exercise 2.7 - Average Distance (Large): {avg_distance_large}")
