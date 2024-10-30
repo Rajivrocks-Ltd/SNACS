@@ -1,0 +1,4 @@
+,Degree Centrality,Closeness Centrality,Betweenness Centrality
+Degree Centrality,1.0,-0.021052631578947364,0.1609022556390977
+Closeness Centrality,-0.021052631578947364,1.0,0.19097744360902258
+Betweenness Centrality,0.1609022556390977,0.19097744360902258,1.0

@@ -1,0 +1,8 @@
+{
+  "Degree Centrality":
+          ["mashable", "matt_369", "tweetmeme", "starlingpoet", "holdemtalkradio", "bonniestwit", "emarketingguru", "tamaraschilling", "centerpet", "thelifehackpost", "sharonhayes", "elocio", "jonnerz", "jason_pollock", "americanwomannn", "fridayluv", "peterfacinelli", "faithgoddess7", "straightstreet", "lorimoreno"],
+  "Closeness Centrality":
+          ["mashable", "matt_369", "starlingpoet", "holdemtalkradio", "bonniestwit", "tamaraschilling", "thelifehackpost", "americandream09", "lorimoreno", "centerpet", "modelsupplies", "faithgoddess7", "americanwomannn", "billzucker", "jason_pollock", "emarketingguru", "weizenbaum", "sharonhayes", "tap29", "nurul54"],
+  "Betweenness Centrality":
+          ["tamaraschilling", "americandream09", "straightstreet", "medic_ray", "centerpet", "nachhi", "drjennifer", "teddy_salad", "elocio", "bobcallahan", "modelsupplies", "doc_remy", "bacieabbracci", "josephranseth", "lauralassiter", "jhillstephens", "sharonhayes", "java4two", "dpbkmb", "ciaobella50"]
+}
