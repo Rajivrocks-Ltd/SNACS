@@ -12,8 +12,9 @@ import seaborn as sns
 import community as community_louvain
 
 # Exercise 1 - implementing BoundingDiameter algorithm
+# =====================================================================================================================
 
-def test():
+def generate_graph_q1():
     # Create the graph
     G = nx.Graph()
 
@@ -28,18 +29,127 @@ def test():
     ]
     G.add_edges_from(edges)
 
-
     # Calculate the eccentricity of all nodes
-    eccentricity_dict = nx.eccentricity(G)
-
-    # Print the eccentricity of each node
-    for node, ecc in eccentricity_dict.items():
-        print(f"Eccentricity of node {node}: {ecc}")
+    # eccentricity_dict = nx.eccentricity(G)
+    return G
 
 
-# Exercise 2
-def museum():
-    pass
+
+
+# End of Exercise 1
+# =====================================================================================================================
+
+# Exercise 2 - museum data
+# =====================================================================================================================
+def shuffle_excel_rows(input_file_path, output_file_path='shuffled_file.xlsx'):
+    """
+    Reads an Excel file, shuffles its rows, and saves the shuffled data to a new Excel file.
+
+    Parameters:
+        input_file_path (str): The path to the input Excel file.
+        output_file_path (str): The path to save the shuffled Excel file. Default is 'shuffled_file.xlsx'.
+    """
+    # Load the Excel file
+    df = pd.read_excel(input_file_path)
+
+    # Shuffle the rows
+    df_shuffled = df.sample(frac=1).reset_index(drop=True)
+
+    # Save the shuffled DataFrame to a new Excel file
+    df_shuffled.to_excel(output_file_path, index=False)
+
+    print(f"Rows have been shuffled and saved to {output_file_path}")
+
+def construct_undirected_graph_from_adjacency_list(file_path):
+    # Load the adjacency list data from the Excel file, with the room pairs in one column
+    adjacency_data = pd.read_excel(file_path, header=None, names=["Rooms"])
+
+    # Create an undirected graph
+    graph = nx.Graph()
+
+    # Add edges to the graph from each line in the file
+    for _, row in adjacency_data.iterrows():
+        # Split the comma-separated rooms
+        room1, room2 = row["Rooms"].split(",")
+        room1, room2 = room1.strip(), room2.strip()  # Remove any extra whitespace
+        print(f"Adding edge between {room1} and {room2}")
+        graph.add_edge(room1, room2)  # Add an undirected edge between Room1 and Room2
+
+    return graph
+
+def find_mst_and_hamiltonian_path(graph):
+    # Step 1: Generate the Minimum Spanning Tree
+    mst = nx.minimum_spanning_tree(museum_graph)
+
+    # Step 2: Perform a DFS traversal on the MST to approximate a Hamiltonian path
+    start_node = list(mst.nodes)[0]  # Choose an arbitrary start node
+    hamiltonian_path = list(nx.dfs_preorder_nodes(mst, source=start_node))
+
+    # Display the path
+    print("Approximate Hamiltonian Path to visit each room:", hamiltonian_path)
+
+
+import networkx as nx
+
+
+def transform_to_dual_graph(original_graph):
+    """
+    Transforms the original museum graph into a dual graph where each edge (doorway or staircase)
+    becomes a node and each transition within a room becomes an edge.
+
+    Parameters:
+    - original_graph (nx.Graph): The original graph where nodes represent rooms and edges
+      represent doorways/staircases.
+
+    Returns:
+    - dual_graph (nx.Graph): The transformed graph where nodes represent doorways/stairs
+      and edges represent transitions through rooms.
+    """
+    # Initialize the dual graph
+    dual_graph = nx.Graph()
+
+    # Use a set to track unique edges in the original graph to avoid duplicates
+    unique_edges = set()
+
+    # Step 1: Add a node in dual graph for each unique edge in the original graph
+    for edge in original_graph.edges():
+        # Sort edge nodes to prevent (A, B) and (B, A) duplicates in undirected graph
+        sorted_edge = tuple(sorted(edge))
+        unique_edges.add(sorted_edge)
+
+    # Add nodes to the dual graph based on unique edges
+    for edge in unique_edges:
+        dual_graph.add_node(edge)  # Each unique edge in original_graph is a node in dual_graph
+
+    # Step 2: Add edges in dual graph to represent possible transitions within each room
+    for room in original_graph.nodes():
+        # Get all edges (doorways/stairs) connected to this room
+        connected_edges = [tuple(sorted(e)) for e in original_graph.edges(room) if tuple(sorted(e)) in unique_edges]
+
+        # Connect each pair of edges to simulate transitions through the room
+        for i in range(len(connected_edges)):
+            for j in range(i + 1, len(connected_edges)):
+                dual_graph.add_edge(connected_edges[i], connected_edges[j])
+
+    return dual_graph
+
+
+def find_best_rooms_for_first_aid(graph):
+    # Calculate eccentricity for each room
+    eccentricity = nx.eccentricity(graph)
+
+    # Find the three rooms with the smallest eccentricity values
+    sorted_rooms = sorted(eccentricity, key=eccentricity.get)
+    best_rooms = sorted_rooms[:3]  # The three most central rooms
+
+    # Display the results
+    for rank, room in enumerate(best_rooms, start=1):
+        print(f"{rank}. Room: {room}, Eccentricity: {eccentricity[room]}")
+
+    return best_rooms
+
+# End of Exercise 2
+# =====================================================================================================================
 
 
 # Exercise 3.1 3.2 - Twitter data
@@ -433,17 +543,50 @@ def plot_weight_distribution_scatter(graph):
 # =====================================================================================================================
 
 if __name__ == "__main__":
+    # Exercise 1
+    # ...
+    # shuffle excel file rows
+    # shuffle_excel_rows('data/museum_adjacency_list.xlsx', 'data/museum_adjacency_list_2.xlsx')
+
+    # Exercise 2.2
+    # print("Constructing the Rijksmuseum Floor Plan Layout Graph")
+    # museum_graph = construct_undirected_graph_from_adjacency_list('data/museum_adjacency_list_2.xlsx')
+    # print(f'Number of nodes: {museum_graph.number_of_nodes()}')
+    # print(f'Number of edges: {museum_graph.number_of_edges()}')
+    # plt.figure(figsize=(12, 12))
+    # plt.title("Rijksmuseum Floor Plan Layout Graph")
+    # nx.draw(museum_graph, with_labels=True, pos=nx.kamada_kawai_layout(museum_graph))
+    # plt.show()
+
+    # Exercise 2.4
+    # print("Finding the Minimum Spanning Tree and Approximate Hamiltonian Path")
+    # find_mst_and_hamiltonian_path(museum_graph)
+
+    # Exercise 2.5
+    # print("Transforming the Museum Graph into a Dual Graph")
+    # dual_graph = transform_to_dual_graph(museum_graph)
+    # print(f'Number of nodes in the dual graph: {dual_graph.number_of_nodes()}')
+    # print(f'Number of edges in the dual graph: {dual_graph.number_of_edges()}')
+    # plt.figure(figsize=(12, 12))
+    # plt.title("Dual Graph of the Rijksmuseum Floor Plan Layout")
+    # nx.draw(dual_graph, with_labels=True, pos=nx.kamada_kawai_layout(dual_graph))
+    # plt.show()
+
+    # Exercise 2.6
+    # print("Finding the Best Rooms for First Aid Locations")
+    # _ = find_best_rooms_for_first_aid(museum_graph)
+
     # Exercise 3.1
-    twitter_data_small = 'data/twitter-small.tsv'
-    twitter_data_large = 'data/twitter-larger.tsv'
+    # twitter_data_small = 'data/twitter-small.tsv'
+    # twitter_data_large = 'data/twitter-larger.tsv'
 
     # mention_graph_small = construct_mention_graph(twitter_data_small)
     # create_clean_tsv('data/twitter-small-cleaned.tsv', mention_graph_small)
-    mention_graph_small = load_graph_from_tsv('data/twitter-small-cleaned.tsv')
+    # mention_graph_small = load_graph_from_tsv('data/twitter-small-cleaned.tsv')
 
     # mention_graph_larger = construct_mention_graph(twitter_data_large)
     # create_clean_tsv('data/twitter-larger-cleaned.tsv', mention_graph_larger)
-    mention_graph_larger = load_graph_from_tsv('data/twitter-larger-cleaned.tsv')
+    # mention_graph_larger = load_graph_from_tsv('data/twitter-larger-cleaned.tsv')
 
     # # Exercise 3.2
     # print("Basic Stats for Small Graph:")
@@ -497,7 +640,7 @@ if __name__ == "__main__":
 
     # Exercise 3.5
     # print("\nWeight Distribution for Small Graph:")
-    plot_weight_distribution_scatter(mention_graph_small)
+    # plot_weight_distribution_scatter(mention_graph_small)
 
 
     # mention_graph_large = construct_mention_graph(twitter_data_large)
